@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source ./initial-ci.sh
+source ./scripts/initial-ci.sh
 
 # delete all files except /dist
 run "rm -rf !(/dist)"
