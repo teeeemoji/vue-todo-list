@@ -2,7 +2,7 @@
 source ./scripts/initial-ci.sh
 
 # delete all files except /dist
- run "find . \! -name 'dist' -depth 1 -delete"
+ run "find . \! -name 'dist' -depth '1' -delete"
 
 # move files in /dist folder to root folder
  run "mv ./dist/* ./"
