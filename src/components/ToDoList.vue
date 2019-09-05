@@ -4,51 +4,61 @@
       Empty
     </div>
     <transition-group
-      ref="list"
-      class="todo-list"
-      name="todo-list"
-      tag="ul"
-      @after-enter="_afterEnter"
-      v-else
+        ref="list"
+        class="todo-list"
+        name="flash"
+        enter-active-class="animated jackInTheBox"
+        leave-active-class="animated hinge"
+        move-class="todo-list-moving"
+        tag="ul"
+        @after-enter="_afterEnter"
+        v-else
     >
       <li
-        class="todo-list-item"
-        ref="item"
-        is="ToDoListItem"
-        v-for="todoItem in sortedTodoList"
-        v-bind="todoItem.addTime === editItemId ? tmpItem : todoItem"
-        :key="todoItem.addTime"
-        :isEdit="todoItem.addTime === editItemId"
-        @edit="_handleListItemEdit"
-        @status-change="_handleStatusChange"
-        @change="_handleItemChange"
+          class="todo-list-item"
+          ref="item"
+          is="ToDoListItem"
+          v-for="todoItem in sortedTodoList"
+          v-bind="todoItem.addTime === editItemId ? tmpItem : todoItem"
+          :key="todoItem.addTime"
+          :isEdit="todoItem.addTime === editItemId"
+          @edit="_handleListItemEdit"
+          @status-change="_handleStatusChange"
+          @change="_handleItemChange"
       ></li>
       <li
-        class="todo-list-item"
-        ref="new"
-        is="ToDoListItem"
-        v-if="isAddNew"
-        v-bind="tmpItem"
-        :key="isAddNew ? tmpItem.addTime : -1"
-        :isEdit="isAddNew"
-        @edit="_handleListItemEdit"
-        @status-change="_handleStatusChange"
-        @change="_handleItemChange"
+          class="todo-list-item"
+          ref="new"
+          is="ToDoListItem"
+          v-if="isAddNew"
+          v-bind="tmpItem"
+          :key="isAddNew ? tmpItem.addTime : -1"
+          :isEdit="isAddNew"
+          @edit="_handleListItemEdit"
+          @status-change="_handleStatusChange"
+          @change="_handleItemChange"
       ></li>
     </transition-group>
-    <div class="operations" key="viewing" v-if="!isEdit">
-      <el-button key="new" @click="_handleAddNewClick">
-        New
-      </el-button>
-    </div>
-    <div class="operations" key="editing" v-if="isEdit">
-      <el-button key="confirm" @click="_handleConfirmClick">
-        Confirm
-      </el-button>
-      <el-button v-show="isEdit" key="cancel" @click="_handleCancelClick">
-        Cancel
-      </el-button>
-    </div>
+    <transition
+        name="slide"
+        mode="out-in"
+        enter-active-class="animated slideInRight"
+        leave-active-class="animated slideOutLeft"
+    >
+      <div class="operations" key="viewing" v-if="!isEdit">
+        <el-button key="new" @click="_handleAddNewClick">
+          New
+        </el-button>
+      </div>
+      <div class="operations" key="editing" v-if="isEdit">
+        <el-button key="confirm" @click="_handleConfirmClick">
+          Confirm
+        </el-button>
+        <el-button v-show="isEdit" key="cancel" @click="_handleCancelClick">
+          Cancel
+        </el-button>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -63,7 +73,7 @@ export default {
   components: {
     ToDoListItem
   },
-  data: function() {
+  data: function () {
     return {
       todoList: [
         {
@@ -95,11 +105,11 @@ export default {
     }
   },
   computed: {
-    isEdit: function() {
+    isEdit: function () {
       return this.editItemId !== NOT_EDIT_INDEX || this.isAddNew
     },
-    sortedTodoList: function() {
-      return this.todoList.slice().sort(function(a, b) {
+    sortedTodoList: function () {
+      return this.todoList.slice().sort(function (a, b) {
         if (a.done === b.done) {
           return 0
         } else if (a.done && !b.done) {
@@ -111,21 +121,21 @@ export default {
     }
   },
   methods: {
-    _handleListItemEdit: function(e, addTime) {
+    _handleListItemEdit: function (e, addTime) {
       if (this.isEdit) {
         return
       }
-      const index = this.todoList.findIndex(function(i) {
+      const index = this.todoList.findIndex(function (i) {
         return i.addTime === addTime
       })
       this.editItemId = addTime
       this.tmpItem = {...this.todoList[index]}
     },
-    _handleItemChange: function(newVal) {
+    _handleItemChange: function (newVal) {
       this.tmpItem = Object.assign({}, this.tmpItem, newVal)
     },
-    _handleStatusChange: function(key, newStatus) {
-      const index = this.todoList.findIndex(function(i) {
+    _handleStatusChange: function (key, newStatus) {
+      const index = this.todoList.findIndex(function (i) {
         return i.addTime === key
       })
       if (this.todoList[index]) {
@@ -138,11 +148,11 @@ export default {
         this.$set(this.tmpItem, 'done', newStatus)
       }
     },
-    _handleAddNewClick: function() {
+    _handleAddNewClick: function () {
       this.isAddNew = true
       this.tmpItem = generateEmptyItem()
     },
-    _handleConfirmClick: function() {
+    _handleConfirmClick: function () {
       if (this.isAddNew) {
         if (!this.$refs.new.validate()) {
           return
@@ -151,26 +161,26 @@ export default {
         this.todoList.push(Object.assign({}, this.tmpItem))
       } else {
         const addTime = this.editItemId
-        const ref = this.$refs.item.find(function(i) {
+        const ref = this.$refs.item.find(function (i) {
           return i.addTime === addTime
         })
         if (!ref || !ref.validate()) {
           return
         }
-        const itemIndex = this.todoList.findIndex(function(i) {
+        const itemIndex = this.todoList.findIndex(function (i) {
           return i.addTime === addTime
         })
         this.$set(this.todoList, itemIndex, {...this.tmpItem})
       }
       this.editItemId = NOT_EDIT_INDEX
     },
-    _handleCancelClick: function() {
+    _handleCancelClick: function () {
       if (this.isAddNew) {
         this.isAddNew = false
       }
       this.editItemId = NOT_EDIT_INDEX
     },
-    _afterEnter: function(el) {
+    _afterEnter: function (el) {
       const listDOM = this.$refs.list.$el
       if (!!listDOM && listDOM.offsetHeight < listDOM.scrollHeight) {
         Velocity(el, 'scroll', {duration: 300, container: listDOM})
@@ -180,7 +190,9 @@ export default {
 }
 </script>
 
-<style>
+<style lang="less">
+@import '../../node_modules/animate.css/animate.min.css';
+
 .todo-list-comp {
   display: flex;
   position: relative;
@@ -200,20 +212,11 @@ export default {
   flex-grow: 1;
   padding: 20px;
   overflow-y: auto;
+  border-bottom: 1px solid #dcdfe6;
 }
 
 .todo-list-item {
-  transition: all 0.3s ease-in-out;
-}
-
-.todo-list-enter,
-.todo-list-leave-to {
-  opacity: 0;
-  transform: translateX(1000px);
-}
-
-.todo-list-leave-active {
-  position: absolute;
+  transition: all .3s ease-in-out;
 }
 
 .operations {
@@ -224,6 +227,5 @@ export default {
   padding: 20px;
   text-align: center;
   background-color: #fff;
-  border-top: 1px solid #dcdfe6;
 }
 </style>
